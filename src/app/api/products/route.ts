@@ -9,8 +9,16 @@ export async function GET(request: Request) {
     const search = searchParams.get("search");
     const sort = searchParams.get("sort");
     const limit = searchParams.get("limit");
+    const page = searchParams.get("page");
 
-    const where: any = {};
+    const pageNum = page ? Math.max(1, parseInt(page)) : 1;
+    const pageSize = limit ? Math.min(100, Math.max(1, parseInt(limit))) : undefined;
+
+    const where: {
+      category?: string;
+      featured?: boolean;
+      OR?: Array<{ name?: { contains: string }; description?: { contains: string } }>;
+    } = {};
 
     if (category && category !== "all") {
       where.category = category;
@@ -27,7 +35,9 @@ export async function GET(request: Request) {
       ];
     }
 
-    let orderBy: any = { createdAt: "desc" };
+    type SortOrder = "asc" | "desc";
+    type OrderBy = { createdAt?: SortOrder; price?: SortOrder; name?: SortOrder };
+    let orderBy: OrderBy = { createdAt: "desc" };
     if (sort === "price-asc") orderBy = { price: "asc" };
     if (sort === "price-desc") orderBy = { price: "desc" };
     if (sort === "name") orderBy = { name: "asc" };
@@ -35,13 +45,24 @@ export async function GET(request: Request) {
     const products = await prisma.product.findMany({
       where,
       orderBy,
-      take: limit ? parseInt(limit) : undefined,
+      take: pageSize,
+      skip: pageSize ? (pageNum - 1) * pageSize : undefined,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        images: true,
+        category: true,
+        stock: true,
+        featured: true,
+        createdAt: true,
+      },
     });
 
-    // Parse images JSON string
     const parsed = products.map((p) => ({
       ...p,
-      images: JSON.parse(p.images),
+      images: JSON.parse(p.images) as string[],
     }));
 
     return NextResponse.json(parsed);

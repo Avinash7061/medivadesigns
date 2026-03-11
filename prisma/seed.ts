@@ -120,7 +120,7 @@ const PRODUCTS = [
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // Create admin user
+  // Create admin user (upsert to avoid duplicates on re-seed)
   const hashedPassword = await bcrypt.hash("admin123", 12);
   const admin = await prisma.user.upsert({
     where: { email: "admin@medivadesigns.shop" },
@@ -132,15 +132,24 @@ async function main() {
       role: "ADMIN",
     },
   });
-  console.log("✅ Admin user created:", admin.email);
+  console.log("✅ Admin user ready:", admin.email);
 
-  // Create products
+  // Create products using upsert by name to avoid duplicates on re-seed
   for (let i = 0; i < PRODUCTS.length; i++) {
     const p = PRODUCTS[i];
+    const imageData = JSON.stringify([MANDALA_IMAGES[i % MANDALA_IMAGES.length]]);
+
+    // Check if a product with this name already exists
+    const existing = await prisma.product.findFirst({ where: { name: p.name } });
+    if (existing) {
+      console.log(`⏭️  Product already exists, skipping: ${p.name}`);
+      continue;
+    }
+
     await prisma.product.create({
       data: {
         ...p,
-        images: JSON.stringify([MANDALA_IMAGES[i % MANDALA_IMAGES.length]]),
+        images: imageData,
       },
     });
     console.log(`✅ Product created: ${p.name}`);

@@ -3,8 +3,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_dummy", {
-  apiVersion: "2023-10-16" as any,
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error("Missing STRIPE_SECRET_KEY environment variable");
+}
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2026-02-25.clover",
 });
 
 export async function POST(request: Request) {
@@ -14,42 +18,50 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { items } = await request.json();
+    const body = await request.json();
+    const { items } = body;
 
-    if (!items || items.length === 0) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "No items provided" }, { status: 400 });
     }
 
-    const lineItems = items.map((item: any) => ({
-      price_data: {
-        currency: "inr",
-        product_data: {
-          name: item.name,
-          images: item.image ? [item.image] : [],
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map(
+      (item: { name: string; price: number; image?: string; quantity: number }) => ({
+        price_data: {
+          currency: "inr",
+          product_data: {
+            name: item.name,
+            images: item.image ? [item.image] : [],
+          },
+          unit_amount: Math.round(item.price * 100),
         },
-        unit_amount: Math.round(item.price * 100),
-      },
-      quantity: item.quantity,
-    }));
+        quantity: item.quantity,
+      })
+    );
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+    const userId = session.user.id;
+    if (!userId) {
+      return NextResponse.json({ error: "User ID not found in session" }, { status: 401 });
+    }
 
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart`,
-      customer_email: session.user.email || undefined,
+      success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/cart`,
+      customer_email: session.user.email ?? undefined,
       metadata: {
-        userId: (session.user as any).id,
+        userId,
       },
     });
 
     return NextResponse.json({ url: checkoutSession.url });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Checkout failed";
     console.error("Checkout error:", error);
-    return NextResponse.json(
-      { error: error.message || "Checkout failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

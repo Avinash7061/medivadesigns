@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mediva Designs — Handcrafted Mandala Paintings
+
+An e-commerce platform for handcrafted mandala paintings built with Next.js, Prisma (SQLite), NextAuth, and Stripe.
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Set Up Environment Variables
+
+Copy the example environment file and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your configuration:
+- `DATABASE_URL` — SQLite file path (default: `file:./prisma/dev.db`)
+- `NEXTAUTH_SECRET` — Random secret for JWT signing (generate with `openssl rand -base64 32`)
+- `NEXTAUTH_URL` — Your app URL (e.g., `http://localhost:3000`)
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — For Google OAuth (optional)
+- `STRIPE_SECRET_KEY` — From [Stripe Dashboard](https://dashboard.stripe.com/test/apikeys)
+- `STRIPE_PUBLISHABLE_KEY` — From Stripe Dashboard
+- `STRIPE_WEBHOOK_SECRET` — From Stripe CLI or Stripe Dashboard webhook settings
+- `NEXT_PUBLIC_APP_URL` — Your app's public URL
+
+### 3. Set Up the Database
+
+Create the database and seed initial data:
+
+```bash
+npm run db:setup
+```
+
+This runs `prisma db push` (creates the SQLite database) and seeds it with sample products and an admin user.
+
+**Admin credentials:** `admin@medivadesigns.shop` / `admin123`
+
+### 4. Run the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Available Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run start` | Start production server |
+| `npm run db:setup` | Create DB + seed data (first-time setup) |
+| `npm run db:push` | Push schema changes to DB |
+| `npm run db:seed` | Seed the database with sample data |
+| `npm run db:migrate` | Apply pending migrations |
+| `npm run lint` | Run ESLint |
 
-## Learn More
+## Payment Gateway (Stripe)
 
-To learn more about Next.js, take a look at the following resources:
+This app uses [Stripe](https://stripe.com) for payments. To test locally:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Install the [Stripe CLI](https://stripe.com/docs/stripe-cli)
+2. Run `stripe listen --forward-to localhost:3000/api/webhooks/stripe` to forward webhooks
+3. Copy the webhook signing secret and set `STRIPE_WEBHOOK_SECRET` in `.env`
+4. Use test card `4242 4242 4242 4242` with any future expiry and CVC
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tech Stack
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Framework:** Next.js 16 (App Router)
+- **Database:** SQLite via Prisma ORM
+- **Authentication:** NextAuth.js (Credentials + Google OAuth)
+- **Payments:** Stripe Checkout
+- **Styling:** CSS Modules + CSS Variables
+- **Animations:** Framer Motion
