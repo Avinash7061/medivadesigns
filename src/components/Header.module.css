@@ -9,10 +9,11 @@
 }
 
 .header-scrolled {
-  background: rgba(10, 10, 15, 0.85);
+  background: rgba(254, 252, 249, 0.9);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 .header-inner {
@@ -213,7 +214,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(10, 10, 15, 0.97);
+  background: rgba(254, 252, 249, 0.97);
   backdrop-filter: blur(20px);
   padding: var(--space-xl);
   z-index: 999;

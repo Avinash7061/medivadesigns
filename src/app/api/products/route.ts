@@ -39,10 +39,15 @@ export async function GET(request: Request) {
     });
 
     // Parse images JSON string
-    const parsed = products.map((p) => ({
-      ...p,
-      images: JSON.parse(p.images),
-    }));
+    const parsed = products.map((p) => {
+      let images: string[] = [];
+      try {
+        images = JSON.parse(p.images);
+      } catch {
+        images = [];
+      }
+      return { ...p, images };
+    });
 
     return NextResponse.json(parsed);
   } catch (error) {

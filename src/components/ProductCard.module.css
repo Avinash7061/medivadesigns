@@ -35,7 +35,7 @@
 .product-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(10, 10, 15, 0.8) 0%, transparent 50%);
+  background: linear-gradient(to top, rgba(45, 42, 38, 0.8) 0%, transparent 50%);
   opacity: 0;
   transition: opacity var(--transition-base);
   display: flex;

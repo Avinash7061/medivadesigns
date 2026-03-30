@@ -44,7 +44,7 @@ export default function CheckoutSuccessPage() {
             height: "80px",
             margin: "0 auto var(--space-xl)",
             borderRadius: "50%",
-            background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1))",
+            background: "linear-gradient(135deg, rgba(5, 150, 105, 0.08), rgba(5, 150, 105, 0.04))",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

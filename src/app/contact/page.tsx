@@ -66,7 +66,7 @@ export default function ContactPage() {
                 </div>
               ))}
 
-              <div style={{ padding: "var(--space-xl)", background: "linear-gradient(135deg, rgba(107, 33, 168, 0.1), rgba(212, 168, 83, 0.1))", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", marginTop: "var(--space-xl)" }}>
+              <div style={{ padding: "var(--space-xl)", background: "linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(198, 125, 59, 0.05))", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", marginTop: "var(--space-xl)" }}>
                 <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", marginBottom: "var(--space-sm)" }}>Custom Orders</h3>
                 <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem", lineHeight: 1.6 }}>
                   Want a personalized mandala painting? We offer custom designs tailored to your preferences. Reach out to discuss your vision.
@@ -81,7 +81,7 @@ export default function ContactPage() {
               </h2>
 
               {sent && (
-                <div style={{ padding: "0.75rem 1rem", borderRadius: "var(--radius-md)", background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", color: "var(--success)", fontSize: "0.9rem", marginBottom: "var(--space-lg)" }}>
+                <div style={{ padding: "0.75rem 1rem", borderRadius: "var(--radius-md)", background: "rgba(5, 150, 105, 0.08)", border: "1px solid rgba(5, 150, 105, 0.2)", color: "var(--success)", fontSize: "0.9rem", marginBottom: "var(--space-lg)" }}>
                   ✓ Message sent! We&apos;ll get back to you soon.
                 </div>
               )}

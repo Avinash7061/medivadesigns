@@ -15,7 +15,7 @@
 .hero-mandala {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(147, 51, 234, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.12);
   animation: mandala-rotate 60s linear infinite;
 }
 
@@ -24,7 +24,7 @@
   height: 600px;
   right: -100px;
   top: -100px;
-  border-color: rgba(147, 51, 234, 0.1);
+  border-color: rgba(139, 92, 246, 0.08);
 }
 
 .hero-mandala-2 {
@@ -32,7 +32,7 @@
   height: 400px;
   right: 0;
   top: 0;
-  border-color: rgba(212, 168, 83, 0.12);
+  border-color: rgba(198, 125, 59, 0.1);
   animation-direction: reverse;
   animation-duration: 45s;
 }
@@ -42,7 +42,7 @@
   height: 200px;
   right: 100px;
   top: 100px;
-  border-color: rgba(236, 72, 153, 0.1);
+  border-color: rgba(232, 111, 173, 0.08);
   animation-duration: 30s;
 }
 
@@ -51,7 +51,7 @@
   height: 500px;
   left: -200px;
   bottom: -200px;
-  border-color: rgba(212, 168, 83, 0.08);
+  border-color: rgba(198, 125, 59, 0.06);
   animation-direction: reverse;
   animation-duration: 50s;
 }
@@ -187,11 +187,12 @@
 .hero-floating-card {
   position: absolute;
   padding: var(--space-md) var(--space-lg);
-  background: rgba(26, 26, 36, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   animation: float 6s ease-in-out infinite;
+  box-shadow: var(--shadow-md);
 }
 
 .hero-floating-card-1 {
@@ -257,7 +258,7 @@
 .category-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(10, 10, 15, 0.9) 0%, rgba(10, 10, 15, 0.3) 50%, transparent 100%);
+  background: linear-gradient(to top, rgba(45, 42, 38, 0.85) 0%, rgba(45, 42, 38, 0.25) 50%, transparent 100%);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -402,7 +403,7 @@
 .cta-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(107, 33, 168, 0.15), rgba(212, 168, 83, 0.1));
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(198, 125, 59, 0.06));
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }

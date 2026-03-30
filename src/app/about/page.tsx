@@ -18,7 +18,7 @@ export default function AboutPage() {
           style={{
             position: "absolute",
             inset: 0,
-            background: "linear-gradient(135deg, rgba(107, 33, 168, 0.1), rgba(212, 168, 83, 0.05))",
+            background: "linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(198, 125, 59, 0.03))",
           }}
         />
         <div className="container" style={{ position: "relative", zIndex: 1 }}>
@@ -70,7 +70,7 @@ export default function AboutPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
               gap: "var(--space-3xl)",
               alignItems: "center",
             }}
@@ -131,7 +131,7 @@ export default function AboutPage() {
       <section className="section" style={{ background: "var(--bg-secondary)" }}>
         <div className="container">
           <h2 className="section-title">Our Values</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "var(--space-xl)", marginTop: "var(--space-2xl)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "var(--space-xl)", marginTop: "var(--space-2xl)" }}>
             {[
               { icon: "🎨", title: "Authenticity", desc: "Every piece is genuinely handcrafted by skilled artisans, never mass-produced." },
               { icon: "🌿", title: "Sustainability", desc: "We use eco-friendly materials and sustainable packaging for all our shipments." },
@@ -170,15 +170,6 @@ export default function AboutPage() {
           </Link>
         </div>
       </section>
-
-      <style jsx>{`
-        @media (max-width: 768px) {
-          div[style*="grid-template-columns: 1fr 1fr"],
-          div[style*="repeat(3, 1fr)"] {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }
