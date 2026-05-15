@@ -10,6 +10,10 @@ export async function POST(request: Request) {
   const body = await request.text();
   const sig = request.headers.get("stripe-signature")!;
 
+  if (!sig) {
+    return NextResponse.json({ error: "Missing signature" }, { status: 400 });
+  }
+
   let event;
   try {
     event = stripe.webhooks.constructEvent(
@@ -18,6 +22,7 @@ export async function POST(request: Request) {
       process.env.STRIPE_WEBHOOK_SECRET || ""
     );
   } catch (err: any) {
+    console.error(`Webhook Error: ${err.message}`);
     return NextResponse.json(
       { error: `Webhook Error: ${err.message}` },
       { status: 400 }
@@ -26,23 +31,32 @@ export async function POST(request: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
+    const orderId = session.metadata?.orderId;
     const userId = session.metadata?.userId;
 
-    if (userId && session.amount_total) {
+    if (orderId) {
       try {
-        await prisma.order.create({
-          data: {
-            userId,
-            total: session.amount_total / 100,
+        // Update order status
+        await prisma.order.update({
+          where: { id: orderId },
+          data: { 
             status: "PAID",
-            stripeSessionId: session.id,
+            updatedAt: new Date(),
           },
         });
+
+        // Clear user's cart
+        if (userId) {
+          await prisma.cartItem.deleteMany({
+            where: { userId },
+          });
+        }
       } catch (error) {
-        console.error("Failed to create order:", error);
+        console.error("Failed to complete order in webhook:", error);
       }
     }
   }
 
   return NextResponse.json({ received: true });
 }
+

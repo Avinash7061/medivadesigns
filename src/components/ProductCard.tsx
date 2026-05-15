@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import styles from "./ProductCard.module.css";
 
@@ -26,7 +27,15 @@ export default function ProductCard({ id, name, price, image, category, stock, f
   return (
     <Link href={`/shop/${id}`} className={styles["product-card"]}>
       <div className={styles["product-image-wrap"]}>
-        <img src={image} alt={name} className={styles["product-image"]} />
+        <Image 
+          src={image} 
+          alt={name} 
+          className={styles["product-image"]} 
+          width={400} 
+          height={400}
+          style={{ objectFit: "cover" }}
+          priority={featured}
+        />
         {featured && (
           <span className={`badge badge-gold ${styles["product-badge"]}`}>Featured</span>
         )}
@@ -59,3 +68,4 @@ export default function ProductCard({ id, name, price, image, category, stock, f
     </Link>
   );
 }
+

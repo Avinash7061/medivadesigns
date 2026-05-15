@@ -1,8 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import prisma from "@/lib/prisma";
 import ProductCard from "@/components/ProductCard";
 import styles from "./home.module.css";
-import { FiTruck, FiShield, FiHeart } from "react-icons/fi";
+import { FiTruck, FiShield, FiHeart, FiMail } from "react-icons/fi";
 
 async function getFeaturedProducts() {
   try {
@@ -72,9 +73,13 @@ export default async function HomePage() {
 
           <div className={styles["hero-visual"]}>
             <div className={styles["hero-image-wrap"]}>
-              <img
+              <Image
                 src="https://images.unsplash.com/photo-1596568362037-8769af702e05?w=600&h=750&fit=crop"
                 alt="Beautiful Mandala Painting"
+                width={600}
+                height={750}
+                style={{ objectFit: "cover" }}
+                priority
               />
             </div>
             <div className={`${styles["hero-floating-card"]} ${styles["hero-floating-card-1"]}`}>
@@ -104,7 +109,7 @@ export default async function HomePage() {
               { name: "Modern", count: 6, img: "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=400&h=400&fit=crop", slug: "modern" },
             ].map((cat) => (
               <Link href={`/shop?category=${cat.slug}`} key={cat.slug} className={styles["category-card"]}>
-                <img src={cat.img} alt={cat.name} />
+                <Image src={cat.img} alt={cat.name} width={400} height={400} style={{ objectFit: "cover" }} />
                 <div className={styles["category-overlay"]}>
                   <h3 className={styles["category-name"]}>{cat.name}</h3>
                   <p className={styles["category-count"]}>{cat.count} paintings</p>
@@ -223,6 +228,26 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ═══════════════ Newsletter Section ═══════════════ */}
+      <section className="section">
+        <div className="container">
+          <div className={styles["newsletter-card"]}>
+            <div className={styles["newsletter-content"]}>
+              <h2 className={styles["newsletter-title"]}>Join the Inner Circle</h2>
+              <p className={styles["newsletter-desc"]}>
+                Subscribe to receive early access to new collections, exclusive art tips, and 10% off your first order.
+              </p>
+              <form className={styles["newsletter-form"]}>
+                <input type="email" placeholder="your@email.com" required className={styles["newsletter-input"]} />
+                <button type="submit" className="btn btn-primary">
+                  Subscribe
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ═══════════════ CTA Section ═══════════════ */}
       <section className={styles["cta-section"]}>
         <div className={styles["cta-bg"]} />
@@ -241,3 +266,4 @@ export default async function HomePage() {
     </>
   );
 }
+

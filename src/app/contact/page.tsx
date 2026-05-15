@@ -5,15 +5,34 @@ import { FiMail, FiPhone, FiMapPin, FiSend } from "react-icons/fi";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In production, connect this to an email service
-    setSent(true);
-    setTimeout(() => setSent(false), 3000);
-    setForm({ name: "", email: "", subject: "", message: "" });
+    setLoading(true);
+    setError("");
+    
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) throw new Error("Failed to send message");
+
+      setSent(true);
+      setForm({ name: "", email: "", subject: "", message: "" });
+      setTimeout(() => setSent(false), 5000);
+    } catch (err) {
+      setError("Something went wrong. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <div style={{ position: "relative", zIndex: 1 }}>
@@ -86,29 +105,36 @@ export default function ContactPage() {
                 </div>
               )}
 
+              {error && (
+                <div style={{ padding: "0.75rem 1rem", borderRadius: "var(--radius-md)", background: "rgba(220, 38, 38, 0.08)", border: "1px solid rgba(220, 38, 38, 0.2)", color: "var(--error)", fontSize: "0.9rem", marginBottom: "var(--space-lg)" }}>
+                  {error}
+                </div>
+              )}
+
               <form onSubmit={handleSubmit}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)" }}>
                   <div className="form-group">
                     <label className="form-label">Name</label>
-                    <input type="text" className="form-input" placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+                    <input type="text" className="form-input" placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required disabled={loading} />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Email</label>
-                    <input type="email" className="form-input" placeholder="your@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+                    <input type="email" className="form-input" placeholder="your@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required disabled={loading} />
                   </div>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Subject</label>
-                  <input type="text" className="form-input" placeholder="What's this about?" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} required />
+                  <input type="text" className="form-input" placeholder="What's this about?" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} required disabled={loading} />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Message</label>
-                  <textarea className="form-input" style={{ minHeight: "150px", resize: "vertical" }} placeholder="Tell us more..." value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required />
+                  <textarea className="form-input" style={{ minHeight: "150px", resize: "vertical" }} placeholder="Tell us more..." value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} required disabled={loading} />
                 </div>
-                <button type="submit" className="btn btn-primary btn-lg" style={{ width: "100%" }}>
-                  <FiSend /> Send Message
+                <button type="submit" className="btn btn-primary btn-lg" style={{ width: "100%", opacity: loading ? 0.7 : 1 }} disabled={loading}>
+                  {loading ? <div className="spinner" style={{ width: "20px", height: "20px" }} /> : <><FiSend /> Send Message</>}
                 </button>
               </form>
+
             </div>
           </div>
         </div>
