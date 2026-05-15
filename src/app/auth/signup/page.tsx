@@ -29,17 +29,29 @@ export default function SignUpPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Registration failed");
+        setError(data.error || "Registration failed. Please try again.");
         setLoading(false);
         return;
       }
 
       // Auto sign in after registration
-      await signIn("credentials", { email, password, redirect: false });
-      router.push("/");
-      router.refresh();
-    } catch {
-      setError("Something went wrong");
+      const signInRes = await signIn("credentials", { 
+        email, 
+        password, 
+        redirect: false,
+        callbackUrl: "/"
+      });
+
+      if (signInRes?.error) {
+        setError("Account created, but could not sign in automatically. Please sign in manually.");
+        setLoading(false);
+      } else {
+        router.push("/");
+        router.refresh();
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError("Connection error. Please check your internet and try again.");
       setLoading(false);
     }
   };
@@ -78,6 +90,7 @@ export default function SignUpPage() {
 
         <button
           onClick={() => signIn("google", { callbackUrl: "/" })}
+          disabled={loading}
           style={{
             width: "100%",
             padding: "0.85rem",
@@ -92,8 +105,9 @@ export default function SignUpPage() {
             alignItems: "center",
             justifyContent: "center",
             gap: "var(--space-sm)",
-            cursor: "pointer",
+            cursor: loading ? "not-allowed" : "pointer",
             marginBottom: "var(--space-xl)",
+            opacity: loading ? 0.7 : 1,
           }}
         >
           <FcGoogle size={20} />
@@ -117,25 +131,25 @@ export default function SignUpPage() {
             <label className="form-label">Full Name</label>
             <div style={{ position: "relative" }}>
               <FiUser style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-              <input type="text" className="form-input" style={{ paddingLeft: "2.5rem" }} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required />
+              <input type="text" className="form-input" style={{ paddingLeft: "2.5rem" }} placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required disabled={loading} />
             </div>
           </div>
           <div className="form-group">
             <label className="form-label">Email</label>
             <div style={{ position: "relative" }}>
               <FiMail style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-              <input type="email" className="form-input" style={{ paddingLeft: "2.5rem" }} placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input type="email" className="form-input" style={{ paddingLeft: "2.5rem" }} placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={loading} />
             </div>
           </div>
           <div className="form-group">
             <label className="form-label">Password</label>
             <div style={{ position: "relative" }}>
               <FiLock style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} />
-              <input type="password" className="form-input" style={{ paddingLeft: "2.5rem" }} placeholder="Min 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+              <input type="password" className="form-input" style={{ paddingLeft: "2.5rem" }} placeholder="Min 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} disabled={loading} />
             </div>
           </div>
           <button type="submit" className="btn btn-primary btn-lg" style={{ width: "100%", marginTop: "var(--space-md)" }} disabled={loading}>
-            {loading ? "Creating account..." : "Create Account"}
+            {loading ? "Processing..." : "Create Account"}
             <FiArrowRight />
           </button>
         </form>

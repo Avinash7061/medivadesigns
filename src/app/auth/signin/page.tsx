@@ -18,13 +18,13 @@ function SignInForm() {
   useEffect(() => {
     const urlError = searchParams.get("error");
     if (urlError) {
-      if (urlError === "OAuthSignin") setError("Error starting Google sign in.");
-      else if (urlError === "OAuthCallback") setError("Error completing Google sign in. Please check your credentials.");
-      else if (urlError === "OAuthCreateAccount") setError("Could not create account in database.");
+      if (urlError === "OAuthSignin") setError("Could not start Google sign in. Try again.");
+      else if (urlError === "OAuthCallback") setError("Google sign in failed. Database connection error.");
+      else if (urlError === "OAuthCreateAccount") setError("Account creation failed. Please contact support.");
       else if (urlError === "EmailSignin") setError("Check your email for a sign in link.");
       else if (urlError === "CredentialsSignin") setError("Invalid email or password.");
       else if (urlError === "SessionRequired") setError("Please sign in to access this page.");
-      else setError("An unexpected authentication error occurred.");
+      else setError("An unexpected error occurred. Please try again.");
     }
   }, [searchParams]);
 
@@ -33,18 +33,23 @@ function SignInForm() {
     setError("");
     setLoading(true);
 
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-    if (res?.error) {
-      setError("Invalid email or password");
+      if (res?.error) {
+        setError(res.error === "CredentialsSignin" ? "Invalid email or password" : res.error);
+        setLoading(false);
+      } else {
+        router.push("/");
+        router.refresh();
+      }
+    } catch (err) {
+      setError("Failed to connect to the server.");
       setLoading(false);
-    } else {
-      router.push("/");
-      router.refresh();
     }
   };
 
@@ -78,6 +83,7 @@ function SignInForm() {
 
       <button
         onClick={() => signIn("google", { callbackUrl: "/" })}
+        disabled={loading}
         style={{
           width: "100%",
           padding: "0.85rem",
@@ -92,9 +98,10 @@ function SignInForm() {
           alignItems: "center",
           justifyContent: "center",
           gap: "var(--space-sm)",
-          cursor: "pointer",
+          cursor: loading ? "not-allowed" : "pointer",
           transition: "all 0.2s",
           marginBottom: "var(--space-xl)",
+          opacity: loading ? 0.7 : 1,
         }}
       >
         <FcGoogle size={20} />
@@ -153,6 +160,7 @@ function SignInForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
         </div>
@@ -177,6 +185,7 @@ function SignInForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
         </div>
