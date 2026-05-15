@@ -11,6 +11,7 @@ export const authOptions: AuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      allowDangerousEmailAccountLinking: true,
     }),
     CredentialsProvider({
       name: "credentials",
@@ -46,11 +47,29 @@ export const authOptions: AuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user, account, profile }) {
+      // Allow all sign-ins
+      return true;
+    },
+    async jwt({ token, user, account, trigger }) {
+      // On initial sign-in, attach user data to the token
       if (user) {
-        token.role = (user as any).role;
         token.id = user.id;
+        token.role = (user as any).role;
       }
+
+      // For Google OAuth users, fetch role from DB since adapter creates the user
+      if (account?.provider === "google" && user) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email! },
+          select: { id: true, role: true },
+        });
+        if (dbUser) {
+          token.id = dbUser.id;
+          token.role = dbUser.role;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -60,11 +79,19 @@ export const authOptions: AuthOptions = {
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      // After sign-in, always redirect to the homepage (or the intended page)
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
   },
   pages: {
     signIn: "/auth/signin",
+    error: "/auth/signin",
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
 };
 
 const handler = NextAuth(authOptions);
