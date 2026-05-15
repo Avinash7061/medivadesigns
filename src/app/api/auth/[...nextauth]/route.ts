@@ -54,7 +54,6 @@ export const authOptions: AuthOptions = {
       }
       return token;
     },
-
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).role = token.role;
@@ -62,9 +61,7 @@ export const authOptions: AuthOptions = {
       }
       return session;
     },
-    },
   },
-
   pages: {
     signIn: "/auth/signin",
     error: "/auth/signin",
