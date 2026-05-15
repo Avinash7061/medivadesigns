@@ -3,18 +3,34 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
 
 export default function SignInPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const urlError = searchParams.get("error");
+    if (urlError) {
+      if (urlError === "OAuthSignin") setError("Error starting Google sign in.");
+      else if (urlError === "OAuthCallback") setError("Error completing Google sign in. Please check your credentials.");
+      else if (urlError === "OAuthCreateAccount") setError("Could not create account in database.");
+      else if (urlError === "EmailSignin") setError("Check your email for a sign in link.");
+      else if (urlError === "CredentialsSignin") setError("Invalid email or password.");
+      else if (urlError === "SessionRequired") setError("Please sign in to access this page.");
+      else setError("An unexpected authentication error occurred.");
+    }
+  }, [searchParams]);
+
   const handleSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault();
     setError("");
     setLoading(true);

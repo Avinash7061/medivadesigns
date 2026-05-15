@@ -4,8 +4,8 @@ import ShopClient from "./ShopClient";
 import styles from "./shop.module.css";
 import { ProductSkeleton } from "@/components/Skeleton";
 
-// Render at request time, not build time (DB not available during build)
-export const dynamic = "force-dynamic";
+// This makes the page dynamically rendered or revalidated
+export const revalidate = 3600; // Revalidate every hour
 
 async function getProducts() {
   const products = await prisma.product.findMany({

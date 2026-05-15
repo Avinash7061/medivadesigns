@@ -47,31 +47,14 @@ export const authOptions: AuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
-      // Allow all sign-ins
-      return true;
-    },
-    async jwt({ token, user, account, trigger }) {
-      // On initial sign-in, attach user data to the token
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as any).role;
+        token.role = (user as any).role || "USER";
       }
-
-      // For Google OAuth users, fetch role from DB since adapter creates the user
-      if (account?.provider === "google" && user) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: user.email! },
-          select: { id: true, role: true },
-        });
-        if (dbUser) {
-          token.id = dbUser.id;
-          token.role = dbUser.role;
-        }
-      }
-
       return token;
     },
+
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).role = token.role;
@@ -79,13 +62,9 @@ export const authOptions: AuthOptions = {
       }
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      // After sign-in, always redirect to the homepage (or the intended page)
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
     },
   },
+
   pages: {
     signIn: "/auth/signin",
     error: "/auth/signin",
