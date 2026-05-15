@@ -5,6 +5,10 @@ import ProductCard from "@/components/ProductCard";
 import styles from "./home.module.css";
 import { FiTruck, FiShield, FiHeart, FiMail } from "react-icons/fi";
 
+// Render at request time, not build time (DB not available during build)
+export const dynamic = "force-dynamic";
+
+
 async function getFeaturedProducts() {
   try {
     const products = await prisma.product.findMany({
