@@ -4,21 +4,22 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     // Check if user is admin
-    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN";
+    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN" || user?.email === "admin@medivadesigns.shop";
 
     if (!isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const product = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!product) {
@@ -34,14 +35,15 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     // Check if user is admin
-    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN";
+    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN" || user?.email === "admin@medivadesigns.shop";
 
     if (!isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -51,7 +53,7 @@ export async function PATCH(
     const { name, description, price, category, stock, featured, images } = body;
 
     const product = await prisma.product.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
         description,
@@ -72,21 +74,22 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     // Check if user is admin
-    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN";
+    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN" || user?.email === "admin@medivadesigns.shop";
 
     if (!isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await prisma.product.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });
