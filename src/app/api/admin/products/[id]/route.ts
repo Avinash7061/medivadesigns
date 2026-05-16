@@ -1,54 +1,97 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { createClient } from "@/utils/supabase/server";
 import prisma from "@/lib/prisma";
 
-export async function DELETE(
+export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any)?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id } = await params;
-
   try {
-    await prisma.product.delete({ where: { id } });
-    return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Check if user is admin
+    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN";
+
+    if (!isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!product) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(product);
+  } catch (error) {
+    console.error("[ADMIN_PRODUCT_GET] Error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
-export async function PUT(
+export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any)?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id } = await params;
-
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Check if user is admin
+    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN";
+
+    if (!isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
+    const { name, description, price, category, stock, featured, images } = body;
+
     const product = await prisma.product.update({
-      where: { id },
+      where: { id: params.id },
       data: {
-        name: body.name,
-        description: body.description,
-        price: body.price,
-        category: body.category,
-        stock: body.stock,
-        featured: body.featured,
-        images: JSON.stringify(body.images || []),
+        name,
+        description,
+        price,
+        category,
+        stock,
+        featured,
+        images: images ? JSON.stringify(images) : undefined,
       },
     });
+
     return NextResponse.json(product);
-  } catch {
-    return NextResponse.json({ error: "Failed to update" }, { status: 500 });
+  } catch (error) {
+    console.error("[ADMIN_PRODUCT_PATCH] Error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Check if user is admin
+    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN";
+
+    if (!isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await prisma.product.delete({
+      where: { id: params.id },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("[ADMIN_PRODUCT_DELETE] Error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

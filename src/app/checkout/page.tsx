@@ -1,19 +1,19 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
-import { useSession } from "next-auth/react";
+import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FiCreditCard, FiLock } from "react-icons/fi";
 
 export default function CheckoutPage() {
   const { items, totalPrice } = useCart();
-  const { data: session } = useSession();
+  const { user, loading: authLoading } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  if (!session) {
+  if (!authLoading && !user) {
     router.push("/auth/signin");
     return null;
   }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useSession } from "next-auth/react";
+import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 import { FiSave, FiArrowLeft, FiUpload, FiX, FiImage, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 import Link from "next/link";
@@ -9,7 +9,7 @@ import Link from "next/link";
 const CATEGORIES = ["geometric", "floral", "spiritual", "modern", "traditional"];
 
 export default function NewProductPage() {
-  const { data: session } = useSession();
+  const { user, loading: authLoading } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);

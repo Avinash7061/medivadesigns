@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -19,7 +19,7 @@ import {
 import Image from "next/image";
 
 export default function AdminDashboard() {
-  const { data: session, status } = useSession();
+  const { user, loading: authLoading } = useUser();
   const router = useRouter();
   
   const [activeTab, setActiveTab] = useState("overview");
@@ -29,16 +29,23 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === "authenticated") {
-      if ((session?.user as any)?.role !== "ADMIN") {
+    if (!authLoading) {
+      if (!user) {
+        router.push("/auth/signin");
+        return;
+      }
+      
+      const isAdmin = user.user_metadata?.role === "ADMIN" || 
+                      user.app_metadata?.role === "ADMIN" || 
+                      user.email === "admin@medivadesigns.shop";
+      
+      if (!isAdmin) {
         router.push("/");
         return;
       }
       fetchAllData();
-    } else if (status === "unauthenticated") {
-      router.push("/auth/signin");
     }
-  }, [status, session]);
+  }, [user, authLoading]);
 
   async function fetchAllData() {
     setLoading(true);
@@ -86,7 +93,7 @@ export default function AdminDashboard() {
     }
   }
 
-  if (status === "loading" || loading) {
+  if (authLoading || loading) {
     return <div className="loading-container"><div className="spinner" /></div>;
   }
 

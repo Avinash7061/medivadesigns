@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
-import { useSession } from "next-auth/react";
+import { useUser } from "@/hooks/useUser";
 import { FiMinus, FiPlus, FiTrash2, FiArrowLeft, FiShoppingBag } from "react-icons/fi";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice, totalItems } = useCart();
-  const { data: session } = useSession();
+  const { user } = useUser();
 
   if (items.length === 0) {
     return (
@@ -95,7 +95,7 @@ export default function CartPage() {
             <span style={{ background: "linear-gradient(135deg, var(--secondary), var(--secondary-light))", backgroundClip: "text", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>₹{totalPrice.toLocaleString()}</span>
           </div>
 
-          {session ? (
+          {user ? (
             <Link href="/checkout" className="btn btn-primary btn-lg" style={{ width: "100%", marginTop: "var(--space-lg)" }}>
               Proceed to Checkout
             </Link>

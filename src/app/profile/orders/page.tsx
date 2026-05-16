@@ -1,25 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiPackage, FiCalendar, FiCheckCircle, FiClock, FiArrowLeft } from "react-icons/fi";
 import Image from "next/image";
 
 export default function UserOrdersPage() {
-  const { data: session, status } = useSession();
+  const { user, loading: authLoading } = useUser();
   const router = useRouter();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin");
-    } else if (status === "authenticated") {
-      fetchOrders();
+    if (!authLoading) {
+      if (!user) {
+        router.push("/auth/signin");
+      } else {
+        fetchOrders();
+      }
     }
-  }, [status]);
+  }, [user, authLoading]);
 
   async function fetchOrders() {
     try {
@@ -33,7 +35,7 @@ export default function UserOrdersPage() {
     }
   }
 
-  if (status === "loading" || loading) {
+  if (authLoading || loading) {
     return <div className="loading-container"><div className="spinner" /></div>;
   }
 
