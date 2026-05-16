@@ -2,18 +2,36 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { FiShoppingBag, FiUser, FiMenu, FiX, FiLogOut, FiPackage, FiSettings } from "react-icons/fi";
 import styles from "./Header.module.css";
+import { createClient } from "@/utils/supabase/client";
+import { User } from "@supabase/supabase-js";
 
 export default function Header() {
-  const { data: session } = useSession();
+  const [user, setUser] = useState<User | null>(null);
   const { totalItems } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const supabase = createClient();
+  const router = useRouter();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -31,7 +49,13 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const isAdmin = (session?.user as any)?.role === "ADMIN";
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
+
+  const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN";
 
   return (
     <>
@@ -57,22 +81,22 @@ export default function Header() {
               )}
             </Link>
 
-            {session ? (
+            {user ? (
               <div ref={menuRef} style={{ position: "relative" }}>
                 <button
                   className={styles["header-user-btn"]}
                   onClick={() => setMenuOpen(!menuOpen)}
                 >
-                  {session.user?.image ? (
+                  {user.user_metadata?.avatar_url ? (
                     <img
-                      src={session.user.image}
+                      src={user.user_metadata.avatar_url}
                       alt=""
                       className={styles["header-avatar"]}
                     />
                   ) : (
                     <FiUser />
                   )}
-                  <span>{session.user?.name?.split(" ")[0] || "Account"}</span>
+                  <span>{user.user_metadata?.full_name?.split(" ")[0] || "Account"}</span>
                 </button>
 
                 {menuOpen && (
@@ -91,7 +115,7 @@ export default function Header() {
                     <div className={styles["header-menu-divider"]} />
                     <button
                       className={styles["header-menu-item"]}
-                      onClick={() => signOut()}
+                      onClick={handleSignOut}
                     >
                       <FiLogOut /> Sign Out
                     </button>
@@ -120,7 +144,7 @@ export default function Header() {
         <Link href="/shop" className={styles["header-mobile-link"]} onClick={() => setMobileOpen(false)}>Shop</Link>
         <Link href="/about" className={styles["header-mobile-link"]} onClick={() => setMobileOpen(false)}>About</Link>
         <Link href="/contact" className={styles["header-mobile-link"]} onClick={() => setMobileOpen(false)}>Contact</Link>
-        {!session && (
+        {!user && (
           <Link href="/auth/signin" className="btn btn-primary" onClick={() => setMobileOpen(false)}>Sign In</Link>
         )}
       </div>

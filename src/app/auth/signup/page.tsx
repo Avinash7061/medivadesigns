@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import { FiUser, FiMail, FiLock, FiArrowRight } from "react-icons/fi";
+import { createClient } from "@/utils/supabase/client";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -13,7 +13,23 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const supabase = createClient();
+
+  const handleGoogleSignUp = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,40 +37,47 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Registration failed. Please try again.");
-        setLoading(false);
-        return;
-      }
-
-      // Auto sign in after registration
-      const signInRes = await signIn("credentials", { 
-        email, 
-        password, 
-        redirect: false,
-        callbackUrl: "/"
-      });
-
-      if (signInRes?.error) {
-        setError("Account created, but could not sign in automatically. Please sign in manually.");
+      if (error) {
+        setError(error.message);
         setLoading(false);
       } else {
-        router.push("/");
-        router.refresh();
+        if (data.session) {
+          router.push("/");
+          router.refresh();
+        } else {
+          setSuccess(true);
+          setLoading(false);
+        }
       }
     } catch (err) {
       console.error("Signup error:", err);
-      setError("Connection error. Please check your internet and try again.");
+      setError("Connection error. Please try again.");
       setLoading(false);
     }
   };
+
+  if (success) {
+    return (
+      <div style={{ minHeight: "calc(100vh - var(--header-height))", display: "flex", alignItems: "center", justifyContent: "center", padding: "var(--space-xl)" }}>
+        <div style={{ width: "100%", maxWidth: "440px", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "var(--space-3xl)", textAlign: "center" }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", marginBottom: "var(--space-md)" }}>Check your email</h2>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-xl)" }}>We&apos;ve sent a confirmation link to <strong>{email}</strong>. Please verify your email to continue.</p>
+          <Link href="/auth/signin" className="btn btn-primary" style={{ width: "100%" }}>Return to Sign In</Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -89,7 +112,7 @@ export default function SignUpPage() {
         </div>
 
         <button
-          onClick={() => signIn("google", { callbackUrl: "/" })}
+          onClick={handleGoogleSignUp}
           disabled={loading}
           style={{
             width: "100%",

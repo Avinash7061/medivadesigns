@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
+import { createClient } from "@/utils/supabase/client";
 
 function SignInForm() {
   const router = useRouter();
@@ -14,19 +14,30 @@ function SignInForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const supabase = createClient();
 
   useEffect(() => {
     const urlError = searchParams.get("error");
     if (urlError) {
       if (urlError === "OAuthSignin") setError("Could not start Google sign in. Try again.");
       else if (urlError === "OAuthCallback") setError("Google sign in failed. Database connection error.");
-      else if (urlError === "OAuthCreateAccount") setError("Account creation failed. Please contact support.");
-      else if (urlError === "EmailSignin") setError("Check your email for a sign in link.");
-      else if (urlError === "CredentialsSignin") setError("Invalid email or password.");
-      else if (urlError === "SessionRequired") setError("Please sign in to access this page.");
       else setError("An unexpected error occurred. Please try again.");
     }
   }, [searchParams]);
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,14 +45,13 @@ function SignInForm() {
     setLoading(true);
 
     try {
-      const res = await signIn("credentials", {
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        redirect: false,
       });
 
-      if (res?.error) {
-        setError(res.error === "CredentialsSignin" ? "Invalid email or password" : res.error);
+      if (error) {
+        setError(error.message);
         setLoading(false);
       } else {
         router.push("/");
@@ -82,7 +92,7 @@ function SignInForm() {
       </div>
 
       <button
-        onClick={() => signIn("google", { callbackUrl: "/" })}
+        onClick={handleGoogleSignIn}
         disabled={loading}
         style={{
           width: "100%",

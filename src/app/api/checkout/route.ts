@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { createClient } from "@/utils/supabase/server";
 import Stripe from "stripe";
 import prisma from "@/lib/prisma";
 
@@ -10,12 +9,16 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_dummy", {
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
+    // Map Supabase User ID to our local database schema if necessary
+    // Note: Our Prisma schema uses 'userId' String, which can store the Supabase UUID
+    const userId = user.id;
     const { items } = await request.json();
 
     if (!items || items.length === 0) {
@@ -59,7 +62,7 @@ export async function POST(request: Request) {
       mode: "payment",
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart`,
-      customer_email: session.user.email || undefined,
+      customer_email: user.email || undefined,
       metadata: {
         userId,
         orderId: order.id,
@@ -81,4 +84,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
