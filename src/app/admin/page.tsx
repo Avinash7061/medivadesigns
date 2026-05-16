@@ -17,6 +17,7 @@ import {
   FiUser 
 } from "react-icons/fi";
 import Image from "next/image";
+import { normalizeProductImages } from "@/utils/products";
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useUser();
@@ -60,14 +61,7 @@ export default function AdminDashboard() {
         msgRes.json()
       ]);
 
-      const parsedProducts = productsData.map((p: any) => {
-        if (Array.isArray(p.images)) return p;
-        try {
-          return { ...p, images: JSON.parse(p.images ?? "[]") };
-        } catch {
-          return { ...p, images: [] };
-        }
-      });
+      const parsedProducts = productsData.map(normalizeProductImages);
 
       setProducts(parsedProducts);
       setOrders(ordersData);

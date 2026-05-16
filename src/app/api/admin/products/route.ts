@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import prisma from "@/lib/prisma";
+import { normalizeProductImages } from "@/utils/products";
 
 export async function GET() {
   try {
@@ -18,15 +19,7 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    const parsed = products.map((p) => {
-      let images: string[] = [];
-      try {
-        images = JSON.parse(p.images);
-      } catch {
-        images = [];
-      }
-      return { ...p, images };
-    });
+    const parsed = products.map(normalizeProductImages);
 
     return NextResponse.json(parsed);
   } catch (error) {

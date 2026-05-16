@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import prisma from "@/lib/prisma";
+import { normalizeProductImages } from "@/utils/products";
 
 export async function GET(
   request: NextRequest,
@@ -26,14 +27,7 @@ export async function GET(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    let images: string[] = [];
-    try {
-      images = JSON.parse(product.images);
-    } catch {
-      images = [];
-    }
-
-    return NextResponse.json({ ...product, images });
+    return NextResponse.json(normalizeProductImages(product));
   } catch (error) {
     console.error("[ADMIN_PRODUCT_GET] Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

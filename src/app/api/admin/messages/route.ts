@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import prisma from "@/lib/prisma";
+import { MESSAGE_STATUSES } from "@/utils/messages";
 
 export async function GET() {
   try {
@@ -39,9 +40,8 @@ export async function PATCH(request: Request) {
 
     const body = await request.json();
     const { id, status } = body;
-    const allowedStatuses = ["UNREAD", "READ", "RESOLVED"];
 
-    if (!id || !allowedStatuses.includes(status)) {
+    if (!id || !MESSAGE_STATUSES.includes(status)) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
 
