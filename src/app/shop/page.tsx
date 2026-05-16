@@ -4,8 +4,8 @@ import ShopClient from "./ShopClient";
 import styles from "./shop.module.css";
 import { ProductSkeleton } from "@/components/Skeleton";
 
-// This makes the page dynamically rendered or revalidated
-export const revalidate = 3600; // Revalidate every hour
+// This ensures the page is always fresh and not cached as an empty list
+export const dynamic = "force-dynamic";
 
 async function getProducts() {
   try {

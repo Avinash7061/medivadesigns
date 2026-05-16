@@ -3,27 +3,32 @@
 import { useState, useRef } from "react";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
-import { FiSave, FiArrowLeft, FiUpload, FiX, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
+import { FiSave, FiArrowLeft, FiUpload, FiX, FiCheckCircle, FiAlertCircle, FiTrash2 } from "react-icons/fi";
 import Link from "next/link";
 import { uploadProductImage } from "@/utils/supabase/storage";
 
 const CATEGORIES = ["geometric", "floral", "spiritual", "modern", "traditional"];
 
-export default function NewProductPage() {
+interface EditProductClientProps {
+  product: any;
+}
+
+export default function EditProductClient({ product }: EditProductClientProps) {
   const { user, loading: authLoading } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; msg: string } | null>(null);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>(product.images || []);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [form, setForm] = useState({
-    name: "",
-    description: "",
-    price: "",
-    category: "geometric",
-    stock: "1",
-    featured: false,
+    name: product.name,
+    description: product.description,
+    price: product.price.toString(),
+    category: product.category,
+    stock: product.stock.toString(),
+    featured: product.featured,
   });
 
   const showToast = (type: "success" | "error", msg: string) => {
@@ -39,7 +44,7 @@ export default function NewProductPage() {
     try {
       const newUrls = [];
       for (const file of files) {
-        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        if (file.size > 10 * 1024 * 1024) {
           showToast("error", `${file.name} is too large (max 10MB)`);
           continue;
         }
@@ -63,22 +68,11 @@ export default function NewProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!form.name || !form.description || !form.price) {
-      showToast("error", "Please fill in all required fields");
-      return;
-    }
-
-    if (imageUrls.length === 0) {
-      showToast("error", "Please add at least one image");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const res = await fetch("/api/admin/products", {
-        method: "POST",
+      const res = await fetch(`/api/admin/products/${product.id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
@@ -89,13 +83,31 @@ export default function NewProductPage() {
       });
 
       if (res.ok) {
-        showToast("success", "Product created successfully!");
+        showToast("success", "Product updated successfully!");
         setTimeout(() => router.push("/admin"), 1000);
       } else {
-        showToast("error", "Failed to create product");
+        showToast("error", "Failed to update product");
       }
     } catch {
       showToast("error", "Network error. Please try again.");
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this painting? This cannot be undone.")) return;
+    
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/admin/products/${product.id}`, { method: "DELETE" });
+      if (res.ok) {
+        showToast("success", "Product deleted successfully");
+        router.push("/admin");
+      } else {
+        showToast("error", "Failed to delete product");
+      }
+    } catch {
+      showToast("error", "Failed to delete product");
     }
     setLoading(false);
   };
@@ -110,30 +122,35 @@ export default function NewProductPage() {
 
   return (
     <div className="container" style={{ padding: "var(--space-3xl) var(--space-lg)", maxWidth: "750px", position: "relative", zIndex: 1 }}>
-      <Link href="/admin" style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-sm)", color: "var(--text-secondary)", marginBottom: "var(--space-xl)", fontSize: "0.9rem" }}>
-        <FiArrowLeft /> Back to Dashboard
-      </Link>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-xl)" }}>
+        <Link href="/admin" style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-sm)", color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+          <FiArrowLeft /> Back to Dashboard
+        </Link>
+        <button onClick={handleDelete} className="btn btn-secondary" style={{ color: "var(--error)", border: "1px solid var(--error)" }}>
+          <FiTrash2 /> Delete
+        </button>
+      </div>
 
       <h1 style={{ fontFamily: "var(--font-display)", fontSize: "2rem", fontWeight: 700, marginBottom: "var(--space-xl)" }}>
-        Add New Painting
+        Edit Painting
       </h1>
 
       <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "var(--space-2xl)" }}>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Painting Name *</label>
-            <input type="text" className="form-input" placeholder="e.g. Sacred Lotus Mandala" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+            <input type="text" className="form-input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           </div>
 
           <div className="form-group">
             <label className="form-label">Description *</label>
-            <textarea className="form-input" style={{ minHeight: "130px", resize: "vertical" }} placeholder="Describe this painting in detail — materials, size, techniques, inspiration..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
+            <textarea className="form-input" style={{ minHeight: "130px", resize: "vertical" }} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "var(--space-md)" }}>
             <div className="form-group">
               <label className="form-label">Price (₹) *</label>
-              <input type="number" className="form-input" placeholder="2999" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required min="1" />
+              <input type="number" className="form-input" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required min="1" />
             </div>
             <div className="form-group">
               <label className="form-label">Category</label>
@@ -166,10 +183,7 @@ export default function NewProductPage() {
             >
               <FiUpload style={{ fontSize: "2rem", color: "var(--text-muted)", marginBottom: "var(--space-sm)" }} />
               <p style={{ color: "var(--text-secondary)", fontFamily: "var(--font-accent)", fontWeight: 500 }}>
-                {uploading ? "Uploading to Cloud..." : "Click to upload your painting photo"}
-              </p>
-              <p style={{ color: "var(--text-muted)", fontSize: "0.8rem", marginTop: "var(--space-xs)" }}>
-                PNG, JPG or WebP up to 10MB
+                {uploading ? "Uploading..." : "Click to add more photos"}
               </p>
             </div>
             <input
@@ -222,7 +236,7 @@ export default function NewProductPage() {
           </div>
 
           <button type="submit" className="btn btn-primary btn-lg" style={{ width: "100%", marginTop: "var(--space-md)" }} disabled={loading || uploading}>
-            <FiSave /> {loading ? "Saving to Database..." : "Save Painting"}
+            <FiSave /> {loading ? "Updating..." : "Update Painting"}
           </button>
         </form>
       </div>

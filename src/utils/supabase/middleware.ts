@@ -40,6 +40,8 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith('/auth/signin') &&
     !request.nextUrl.pathname.startsWith('/auth/signup') &&
     !request.nextUrl.pathname.startsWith('/auth/callback') &&
+    !request.nextUrl.pathname.startsWith('/api/products') &&
+    !request.nextUrl.pathname.startsWith('/shop/') &&
     request.nextUrl.pathname !== '/' &&
     request.nextUrl.pathname !== '/shop' &&
     request.nextUrl.pathname !== '/about' &&
