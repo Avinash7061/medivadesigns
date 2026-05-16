@@ -18,7 +18,7 @@ export default function ProfilePage() {
     return null;
   }
 
-  const isAdmin = user.user_metadata?.role === "ADMIN" || user.app_metadata?.role === "ADMIN" || user.email === "admin@medivadesigns.shop";
+  const isAdmin = user.app_metadata?.role === "ADMIN";
 
   return (
     <div className="container" style={{ padding: "var(--space-3xl) var(--space-lg)", maxWidth: "700px", position: "relative", zIndex: 1 }}>

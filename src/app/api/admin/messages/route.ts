@@ -8,7 +8,7 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
 
     // Check if user is admin
-    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN";
+    const isAdmin = user?.app_metadata?.role === "ADMIN";
 
     if (!isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,6 +21,38 @@ export async function GET() {
     return NextResponse.json(messages);
   } catch (error) {
     console.error("[MESSAGES_GET] Error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Check if user is admin
+    const isAdmin = user?.app_metadata?.role === "ADMIN";
+
+    if (!isAdmin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { id, status } = body;
+    const allowedStatuses = ["UNREAD", "READ", "RESOLVED"];
+
+    if (!id || !allowedStatuses.includes(status)) {
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+
+    const updated = await prisma.message.update({
+      where: { id },
+      data: { status },
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error("[MESSAGES_PATCH] Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

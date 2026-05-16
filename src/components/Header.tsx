@@ -55,7 +55,7 @@ export default function Header() {
     router.refresh();
   };
 
-  const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN";
+  const isAdmin = user?.app_metadata?.role === "ADMIN";
 
   return (
     <>

@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -120,20 +119,6 @@ const PRODUCTS = [
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // Create admin user
-  const hashedPassword = await bcrypt.hash("admin123", 12);
-  const admin = await prisma.user.upsert({
-    where: { email: "admin@medivadesigns.shop" },
-    update: {},
-    create: {
-      name: "Admin",
-      email: "admin@medivadesigns.shop",
-      password: hashedPassword,
-      role: "ADMIN",
-    },
-  });
-  console.log("✅ Admin user created:", admin.email);
-
   // Create products
   for (let i = 0; i < PRODUCTS.length; i++) {
     const p = PRODUCTS[i];
@@ -147,7 +132,6 @@ async function main() {
   }
 
   console.log("\n🎉 Seeding complete!");
-  console.log("📧 Admin login: admin@medivadesigns.shop / admin123");
 }
 
 main()

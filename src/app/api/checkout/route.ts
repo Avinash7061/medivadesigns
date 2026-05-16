@@ -19,6 +19,11 @@ export async function POST(request: Request) {
     // Map Supabase User ID to our local database schema if necessary
     // Note: Our Prisma schema uses 'userId' String, which can store the Supabase UUID
     const userId = user.id;
+    const userEmail = user.email ?? null;
+    const userName =
+      (user.user_metadata?.full_name as string | undefined) ??
+      (user.user_metadata?.name as string | undefined) ??
+      null;
     const { items } = await request.json();
 
     if (!items || items.length === 0) {
@@ -32,6 +37,8 @@ export async function POST(request: Request) {
     const order = await prisma.order.create({
       data: {
         userId,
+        userEmail,
+        userName,
         total,
         status: "PENDING",
         items: {

@@ -35,9 +35,7 @@ export default function AdminDashboard() {
         return;
       }
       
-      const isAdmin = user.user_metadata?.role === "ADMIN" || 
-                      user.app_metadata?.role === "ADMIN" || 
-                      user.email === "admin@medivadesigns.shop";
+      const isAdmin = user.app_metadata?.role === "ADMIN";
       
       if (!isAdmin) {
         router.push("/");
@@ -55,10 +53,25 @@ export default function AdminDashboard() {
         fetch("/api/admin/orders"),
         fetch("/api/admin/messages")
       ]);
-      
-      setProducts(await prodRes.json());
-      setOrders(await orderRes.json());
-      setMessages(await msgRes.json());
+
+      const [productsData, ordersData, messagesData] = await Promise.all([
+        prodRes.json(),
+        orderRes.json(),
+        msgRes.json()
+      ]);
+
+      const parsedProducts = productsData.map((p: any) => {
+        if (Array.isArray(p.images)) return p;
+        try {
+          return { ...p, images: JSON.parse(p.images ?? "[]") };
+        } catch {
+          return { ...p, images: [] };
+        }
+      });
+
+      setProducts(parsedProducts);
+      setOrders(ordersData);
+      setMessages(messagesData);
     } catch (err) {
       console.error("Failed to fetch admin data:", err);
     } finally {
@@ -217,8 +230,8 @@ export default function AdminDashboard() {
                   <tr key={o.id} style={{ borderBottom: "1px solid var(--border)" }}>
                     <td style={{ padding: "1rem", fontSize: "0.85rem", color: "var(--text-muted)" }}>#{o.id.slice(0, 8)}</td>
                     <td style={{ padding: "1rem" }}>
-                      <div style={{ fontWeight: 500 }}>{o.user.name}</div>
-                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{o.user.email}</div>
+                      <div style={{ fontWeight: 500 }}>{o.userName ?? "Unknown"}</div>
+                      <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{o.userEmail ?? ""}</div>
                     </td>
                     <td style={{ padding: "1rem", fontSize: "0.9rem" }}>{new Date(o.createdAt).toLocaleDateString()}</td>
                     <td style={{ padding: "1rem", fontWeight: 600 }}>₹{o.total.toLocaleString()}</td>

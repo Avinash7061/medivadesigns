@@ -8,7 +8,7 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
 
     // Check if user is admin
-    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN";
+    const isAdmin = user?.app_metadata?.role === "ADMIN";
 
     if (!isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -18,7 +18,17 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json(products);
+    const parsed = products.map((p) => {
+      let images: string[] = [];
+      try {
+        images = JSON.parse(p.images);
+      } catch {
+        images = [];
+      }
+      return { ...p, images };
+    });
+
+    return NextResponse.json(parsed);
   } catch (error) {
     console.error("[ADMIN_PRODUCTS_GET] Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -31,7 +41,7 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser();
 
     // Check if user is admin
-    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN";
+    const isAdmin = user?.app_metadata?.role === "ADMIN";
 
     if (!isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

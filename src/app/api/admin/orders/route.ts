@@ -8,7 +8,7 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
 
     // Check if user is admin
-    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN";
+    const isAdmin = user?.app_metadata?.role === "ADMIN";
 
     if (!isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -38,7 +38,7 @@ export async function PATCH(request: Request) {
     const { data: { user } } = await supabase.auth.getUser();
 
     // Check if user is admin
-    const isAdmin = user?.app_metadata?.role === "ADMIN" || user?.user_metadata?.role === "ADMIN";
+    const isAdmin = user?.app_metadata?.role === "ADMIN";
 
     if (!isAdmin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -1,12 +1,12 @@
 # Mediva Designs — Handcrafted Mandala Paintings
 
-An e-commerce application for selling handcrafted mandala paintings, built with Next.js, Prisma, NextAuth.js, and Stripe.
+An e-commerce application for selling handcrafted mandala paintings, built with Next.js, Prisma, Supabase Auth, and Stripe.
 
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router)
 - **Database:** PostgreSQL with Prisma ORM
-- **Auth:** NextAuth.js (Credentials + Google OAuth)
+- **Auth:** Supabase Auth (Email + Google OAuth)
 - **Payments:** Stripe Checkout
 - **Styling:** CSS Modules
 - **Language:** TypeScript
@@ -30,13 +30,11 @@ cp .env.example .env
 | Variable | Description |
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection string |
-| `NEXTAUTH_SECRET` | Session encryption key (`openssl rand -base64 32`) |
-| `NEXTAUTH_URL` | App URL (e.g. `http://localhost:3000`) |
-| `NEXT_PUBLIC_APP_URL` | Public app URL (same as `NEXTAUTH_URL`) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
+| `NEXT_PUBLIC_APP_URL` | Public app URL for Stripe redirects |
 | `STRIPE_SECRET_KEY` | Stripe secret key |
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID (optional) |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret (optional) |
 
 ### 3. Set up the database
 
@@ -50,7 +48,8 @@ npx prisma db push
 npm run db:seed
 ```
 
-This creates an admin user (`admin@medivadesigns.shop` / `admin123`) and sample products.
+This creates sample products.
+To enable admin access, set the `role` in the Supabase user's `app_metadata` to `ADMIN`.
 
 ### 5. Run the development server
 
