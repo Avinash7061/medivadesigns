@@ -13,7 +13,7 @@ export default function ContactPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
@@ -59,9 +59,9 @@ export default function ContactPage() {
                 Let&apos;s Connect
               </h2>
               {[
-                { icon: <FiMail />, label: "Email", value: "hello@medivadesigns.shop" },
-                { icon: <FiPhone />, label: "Phone", value: "+91 98765 43210" },
-                { icon: <FiMapPin />, label: "Studio", value: "Mumbai, Maharashtra, India" },
+                { icon: <FiMail />, label: "Email", value: "avinash@medivadesigns.shop" },
+                { icon: <FiPhone />, label: "Phone", value: "+91 7061845974" },
+                { icon: <FiMapPin />, label: "Studio", value: "Jagatpura, Jaipur, Rajasthan 302012" },
               ].map((info) => (
                 <div
                   key={info.label}

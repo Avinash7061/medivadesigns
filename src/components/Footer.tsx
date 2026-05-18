@@ -13,12 +13,11 @@ export default function Footer() {
               Handcrafted mandala paintings that bring harmony, beauty, and spiritual energy to your space.
               Each piece is a unique work of art, created with love and precision.
             </p>
-            <div className={styles["footer-socials"]}>
-              <a href="#" className={styles["footer-social-link"]} aria-label="Instagram"><FiInstagram /></a>
-              <a href="#" className={styles["footer-social-link"]} aria-label="Twitter"><FiTwitter /></a>
-              <a href="#" className={styles["footer-social-link"]} aria-label="Facebook"><FiFacebook /></a>
-              <a href="#" className={styles["footer-social-link"]} aria-label="Email"><FiMail /></a>
+             <div className={styles["footer-socials"]}>
+              <a href="https://www.instagram.com/an_aesthetic_canvas/" target="_blank" rel="noopener noreferrer" className={styles["footer-social-link"]} aria-label="Instagram"><FiInstagram /></a>
+              <a href="mailto:avinash@medivadesigns.shop" className={styles["footer-social-link"]} aria-label="Email"><FiMail /></a>
             </div>
+
           </div>
 
           <div className={styles["footer-column"]}>
