@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, description, price, category, stock, featured, images } = body;
+    const { name, description, price, category, stock, featured, images, dimensions, medium, tags } = body;
 
     const product = await prisma.product.create({
       data: {
@@ -49,6 +49,9 @@ export async function POST(request: Request) {
         stock,
         featured,
         images: JSON.stringify(images || []),
+        dimensions: dimensions || null,
+        medium: medium || null,
+        tags: JSON.stringify(Array.isArray(tags) ? tags : []),
       },
     });
 

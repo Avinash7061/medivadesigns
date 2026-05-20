@@ -24,6 +24,9 @@ export default function NewProductPage() {
     category: "geometric",
     stock: "1",
     featured: false,
+    dimensions: "",
+    medium: "",
+    tags: "",
   });
 
   const showToast = (type: "success" | "error", msg: string) => {
@@ -85,6 +88,7 @@ export default function NewProductPage() {
           price: parseFloat(form.price),
           stock: parseInt(form.stock),
           images: imageUrls,
+          tags: form.tags ? form.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
         }),
       });
 
@@ -147,6 +151,22 @@ export default function NewProductPage() {
               <label className="form-label">Stock</label>
               <input type="number" className="form-input" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} min="0" />
             </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)" }}>
+            <div className="form-group">
+              <label className="form-label">Dimensions</label>
+              <input type="text" className="form-input" placeholder="e.g. 12 x 12 inches" value={form.dimensions} onChange={(e) => setForm({ ...form, dimensions: e.target.value })} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Medium</label>
+              <input type="text" className="form-input" placeholder="e.g. Acrylic on Canvas" value={form.medium} onChange={(e) => setForm({ ...form, medium: e.target.value })} />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Tags (comma-separated)</label>
+            <input type="text" className="form-input" placeholder="e.g. mandala, handmade, wall art" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
           </div>
 
           <div className="form-group">

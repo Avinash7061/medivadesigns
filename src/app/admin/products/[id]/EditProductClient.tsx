@@ -29,6 +29,11 @@ export default function EditProductClient({ product }: EditProductClientProps) {
     category: product.category,
     stock: product.stock.toString(),
     featured: product.featured,
+    dimensions: product.dimensions || "",
+    medium: product.medium || "",
+    tags: (() => {
+      try { return (JSON.parse(product.tags || "[]") as string[]).join(", "); } catch { return ""; }
+    })(),
   });
 
   const showToast = (type: "success" | "error", msg: string) => {
@@ -79,6 +84,7 @@ export default function EditProductClient({ product }: EditProductClientProps) {
           price: parseFloat(form.price),
           stock: parseInt(form.stock),
           images: imageUrls,
+          tags: form.tags ? form.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [],
         }),
       });
 
@@ -164,6 +170,22 @@ export default function EditProductClient({ product }: EditProductClientProps) {
               <label className="form-label">Stock</label>
               <input type="number" className="form-input" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} min="0" />
             </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)" }}>
+            <div className="form-group">
+              <label className="form-label">Dimensions</label>
+              <input type="text" className="form-input" placeholder="e.g. 12 x 12 inches" value={form.dimensions} onChange={(e) => setForm({ ...form, dimensions: e.target.value })} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Medium</label>
+              <input type="text" className="form-input" placeholder="e.g. Acrylic on Canvas" value={form.medium} onChange={(e) => setForm({ ...form, medium: e.target.value })} />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Tags (comma-separated)</label>
+            <input type="text" className="form-input" placeholder="e.g. mandala, handmade, wall art" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
           </div>
 
           <div className="form-group">

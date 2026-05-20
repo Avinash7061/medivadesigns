@@ -50,7 +50,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { name, description, price, category, stock, featured, images } = body;
+    const { name, description, price, category, stock, featured, images, dimensions, medium, tags } = body;
 
     const product = await prisma.product.update({
       where: { id },
@@ -62,6 +62,9 @@ export async function PATCH(
         stock,
         featured,
         images: images ? JSON.stringify(images) : undefined,
+        dimensions: dimensions !== undefined ? (dimensions || null) : undefined,
+        medium: medium !== undefined ? (medium || null) : undefined,
+        tags: tags !== undefined ? JSON.stringify(Array.isArray(tags) ? tags : []) : undefined,
       },
     });
 
