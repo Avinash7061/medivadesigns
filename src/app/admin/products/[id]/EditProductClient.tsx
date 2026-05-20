@@ -42,7 +42,7 @@ export default function EditProductClient({ product }: EditProductClientProps) {
 
     setUploading(true);
     try {
-      const newUrls = [];
+      const newUrls: string[] = [];
       for (const file of files) {
         if (file.size > 10 * 1024 * 1024) {
           showToast("error", `${file.name} is too large (max 10MB)`);

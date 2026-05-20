@@ -19,10 +19,11 @@ export default function SignUpPage() {
 
   const handleGoogleSignUp = async () => {
     setLoading(true);
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${origin}/auth/callback`,
       },
     });
     if (error) {
@@ -37,6 +38,7 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -44,7 +46,7 @@ export default function SignUpPage() {
           data: {
             full_name: name,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${origin}/auth/callback`,
         },
       });
 
