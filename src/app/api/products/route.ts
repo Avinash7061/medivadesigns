@@ -49,7 +49,9 @@ export async function GET(request: Request) {
       return { ...p, images };
     });
 
-    return NextResponse.json(parsed);
+    return NextResponse.json(parsed, {
+      headers: { "Cache-Control": "no-store, must-revalidate" },
+    });
   } catch (error) {
     console.error("[PRODUCTS_GET] Error fetching products:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

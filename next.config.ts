@@ -7,6 +7,16 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        // Supabase Storage — your actual painting photos
+        protocol: "https",
+        hostname: "*.supabase.co",
+      },
+      {
+        // Supabase Storage CDN
+        protocol: "https",
+        hostname: "*.supabase.com",
+      },
     ],
   },
 };
