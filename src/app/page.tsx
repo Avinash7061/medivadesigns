@@ -74,7 +74,7 @@ export default async function HomePage() {
           <div className={styles["hero-visual"]}>
             <div className={styles["hero-image-wrap"]}>
               <Image
-                src="https://images.unsplash.com/photo-1596568362037-8769af702e05?w=600&h=750&fit=crop"
+                src="https://swsdrfmcuuycklfijgws.supabase.co/storage/v1/object/public/products/Selected%20Image/IMG_4448.jpeg"
                 alt="Beautiful Mandala Painting"
                 width={600}
                 height={750}
