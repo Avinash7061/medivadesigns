@@ -94,31 +94,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ═══════════════ Categories Section ═══════════════ */}
-      <section className="section">
-        <div className="container">
-          <h2 className="section-title">Explore by Category</h2>
-          <p className="section-subtitle">
-            Find the perfect mandala that resonates with your spirit
-          </p>
-          <div className={styles["categories-grid"]}>
-            {[
-              { name: "Geometric", count: 12, img: "https://images.unsplash.com/photo-1609619385002-f40f1df9b7eb?w=400&h=400&fit=crop", slug: "geometric" },
-              { name: "Floral", count: 10, img: "https://images.unsplash.com/photo-1582561424760-0321d75e81fa?w=400&h=400&fit=crop", slug: "floral" },
-              { name: "Spiritual", count: 8, img: "https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=400&h=400&fit=crop", slug: "spiritual" },
-              { name: "Modern", count: 6, img: "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=400&h=400&fit=crop", slug: "modern" },
-            ].map((cat) => (
-              <Link href={`/shop?category=${cat.slug}`} key={cat.slug} className={styles["category-card"]}>
-                <Image src={cat.img} alt={cat.name} width={400} height={400} style={{ objectFit: "cover" }} />
-                <div className={styles["category-overlay"]}>
-                  <h3 className={styles["category-name"]}>{cat.name}</h3>
-                  <p className={styles["category-count"]}>{cat.count} paintings</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+
+
 
       {/* ═══════════════ Featured Products ═══════════════ */}
       {featured.length > 0 && (
