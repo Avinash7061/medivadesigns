@@ -74,8 +74,8 @@ export default async function HomePage() {
           <div className={styles["hero-visual"]}>
             <div className={styles["hero-image-wrap"]}>
               <Image
-                src="https://swsdrfmcuuycklfijgws.supabase.co/storage/v1/object/public/products/Selected%20Image/IMG_4448.jpeg"
-                alt="Beautiful Mandala Painting"
+                src="https://swsdrfmcuuycklfijgws.supabase.co/storage/v1/object/public/products/Selected%20Image/IMG_4424.jpeg"
+                alt="Goddess Durga Mandala — Handcrafted by Mediva Designs"
                 width={600}
                 height={750}
                 style={{ objectFit: "cover" }}
