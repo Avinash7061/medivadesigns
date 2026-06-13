@@ -32,8 +32,7 @@ export default function ProductCard({ id, name, price, image, category, stock, f
           alt={name} 
           className={styles["product-image"]} 
           width={400} 
-          height={400}
-          style={{ objectFit: "cover" }}
+          height={500}
           priority={featured}
         />
         {featured && (
