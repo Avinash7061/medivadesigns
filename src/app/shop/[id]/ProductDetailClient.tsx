@@ -96,11 +96,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             {/* Main Image */}
             <div
               style={{
-                aspectRatio: "1",
+                aspectRatio: "3 / 4",
                 borderRadius: "var(--radius-xl)",
                 overflow: "hidden",
                 border: "1px solid var(--border)",
-                background: "var(--bg-tertiary)",
+                background: "#ffffff",
                 marginBottom: "var(--space-md)",
                 position: "relative",
                 cursor: "zoom-in",
@@ -111,9 +111,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   src={product.images[selectedImage]}
                   alt={product.name}
                   fill
-                  style={{ objectFit: "cover", transition: "transform 0.4s ease" }}
+                  style={{ objectFit: "contain", transition: "transform 0.4s ease" }}
                   priority
-                  onMouseEnter={(e) => ((e.target as HTMLImageElement).style.transform = "scale(1.05)")}
+                  onMouseEnter={(e) => ((e.target as HTMLImageElement).style.transform = "scale(1.04)")}
                   onMouseLeave={(e) => ((e.target as HTMLImageElement).style.transform = "scale(1)")}
                 />
               ) : (
@@ -147,7 +147,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                       background: "var(--bg-tertiary)",
                     }}
                   >
-                    <Image src={img} alt={`View ${i + 1}`} fill style={{ objectFit: "cover" }} />
+                    <Image src={img} alt={`View ${i + 1}`} fill style={{ objectFit: "contain", background: "#ffffff" }} />
                   </button>
                 ))}
               </div>
