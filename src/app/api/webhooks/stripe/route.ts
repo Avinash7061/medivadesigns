@@ -1,62 +1,86 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 import prisma from "@/lib/prisma";
+import crypto from "crypto";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_dummy", {
-  apiVersion: "2023-10-16" as any,
-});
-
+/**
+ * Razorpay Webhook Handler
+ * Verifies the webhook signature using RAZORPAY_KEY_SECRET
+ * and updates order status based on payment events.
+ *
+ * Set this URL in your Razorpay dashboard:
+ * https://medivadesigns.shop/api/webhooks/razorpay
+ */
 export async function POST(request: Request) {
-  const body = await request.text();
-  const sig = request.headers.get("stripe-signature")!;
-
-  if (!sig) {
-    return NextResponse.json({ error: "Missing signature" }, { status: 400 });
-  }
-
-  let event;
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET || ""
-    );
-  } catch (err: any) {
-    console.error(`Webhook Error: ${err.message}`);
-    return NextResponse.json(
-      { error: `Webhook Error: ${err.message}` },
-      { status: 400 }
-    );
-  }
+    const body = await request.text();
+    const signature = request.headers.get("x-razorpay-signature") || "";
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_KEY_SECRET || "";
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    const orderId = session.metadata?.orderId;
-    const userId = session.metadata?.userId;
+    // Verify webhook signature
+    const expectedSignature = crypto
+      .createHmac("sha256", secret)
+      .update(body)
+      .digest("hex");
 
-    if (orderId) {
-      try {
-        // Update order status
-        await prisma.order.update({
-          where: { id: orderId },
-          data: { 
-            status: "PAID",
-            updatedAt: new Date(),
-          },
-        });
-
-        // Clear user's cart
-        if (userId) {
-          await prisma.cartItem.deleteMany({
-            where: { userId },
-          });
-        }
-      } catch (error) {
-        console.error("Failed to complete order in webhook:", error);
-      }
+    if (expectedSignature !== signature) {
+      console.error("[WEBHOOK] Invalid Razorpay signature");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
+
+    const event = JSON.parse(body);
+    const { event: eventType, payload } = event;
+
+    console.log("[WEBHOOK] Razorpay event:", eventType);
+
+    switch (eventType) {
+      case "payment.captured": {
+        const payment = payload.payment?.entity;
+        const orderId = payment?.notes?.orderId;
+
+        if (orderId) {
+          await prisma.order.update({
+            where: { id: orderId },
+            data: {
+              status: "PAID",
+              stripeSessionId: payment.id, // store Razorpay payment ID
+            },
+          });
+          console.log(`[WEBHOOK] Order ${orderId} marked as PAID`);
+        }
+        break;
+      }
+
+      case "payment.failed": {
+        const payment = payload.payment?.entity;
+        const orderId = payment?.notes?.orderId;
+
+        if (orderId) {
+          await prisma.order.update({
+            where: { id: orderId },
+            data: { status: "FAILED" },
+          });
+          console.log(`[WEBHOOK] Order ${orderId} marked as FAILED`);
+        }
+        break;
+      }
+
+      case "refund.created": {
+        const refund = payload.refund?.entity;
+        console.log("[WEBHOOK] Refund created:", refund?.id);
+        // Handle refund logic here if needed
+        break;
+      }
+
+      default:
+        console.log(`[WEBHOOK] Unhandled event: ${eventType}`);
+    }
+
+    return NextResponse.json({ received: true });
+  } catch (error: any) {
+    console.error("[WEBHOOK] Error:", error);
+    return NextResponse.json(
+      { error: "Webhook processing failed" },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json({ received: true });
 }
-
